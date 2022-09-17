@@ -1,4 +1,8 @@
 import base64
+import binascii
+import os
+
+import bcrypt
 
 
 def decode_basic_auth(auth):
@@ -18,3 +22,19 @@ def headers_to_dict(headers):
         header_value = item[1].decode('utf-8')
         dictionary[header_name] = header_value
     return dictionary
+
+
+def hashed_password(plain_password):
+    password = bytes(plain_password, 'utf-8')
+    hashed_string = bcrypt.hashpw(password, bcrypt.gensalt()).decode('utf-8')
+    return hashed_string
+
+
+def check_password(plain_password, hashed):
+    password = bytes(plain_password, 'utf-8')
+    hashed_bytes = bytes(hashed, 'utf-8')
+    return bcrypt.checkpw(password, hashed_bytes)
+
+
+def generate_token():
+    return "tds_aqua_" + binascii.hexlify(os.urandom(256)).decode()

@@ -1,21 +1,10 @@
-import utils
+import json
+
+from helpers import utils
+from models.session import Session
+from models.user import User
 
 available_routes = ["/", "/login", "/users/profile"]
-
-users = [
-    {
-        "username": "ashish",
-        "password": "abhishek7",
-        "first_name": "Ashish",
-        "last_name": "SahuJI"
-    },
-    {
-        "username": "praveen",
-        "password": "ashish",
-        "first_name": "Praveen",
-        "last_name": "Rajput"
-    }
-]
 
 
 async def handle_home(send):
@@ -35,9 +24,9 @@ async def handle_home(send):
 def get_user(auth):
     if auth:
         username, password = utils.decode_basic_auth(auth)
-        for user in users:
-            if user["username"] == username and user["password"] == password:
-                return user
+        user = User.get_user_by_email(username)
+        if user and utils.check_password(password, user["password"]):
+            return user
 
 
 async def handle_login(send, auth):
@@ -82,15 +71,21 @@ async def is_404(send, path):
     return False
 
 
-async def handle_profile(send, user):
+async def handle_profile(send, user_record):
+    user_id = user_record["_id"]
+    session_record = Session.create(user_id=user_id)
+    session_token = session_record["token"]
+    response_data = {
+        "token": session_token
+    }
     await send({
         'type': 'http.response.start',
         'status': 200,
         'headers': [
-            [b'content-type', b'text/plain'],
+            [b'content-type', b'application/json'],
         ],
     })
     await send({
         'type': 'http.response.body',
-        'body': f'Welcome to Your Profile, {user["first_name"]}!!)'.encode("utf-8"),
+        'body': bytes(json.dumps(response_data), 'utf-8'),
     })

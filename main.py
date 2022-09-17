@@ -1,7 +1,5 @@
-import uvicorn
-
 import routes
-import utils
+from helpers import utils
 
 
 async def app(scope, receive, send):
@@ -23,7 +21,7 @@ async def app(scope, receive, send):
         await routes.handle_login(send, authorization)
 
 
-if __name__ == "__main__":
-    config = uvicorn.Config("main:app", port=5000, log_level="info", reload=True)
-    server = uvicorn.Server(config)
-    server.run()
+# if __name__ == "__main__":
+#     config = uvicorn.Config("main:app", port=5000, log_level="info", reload=True)
+#     server = uvicorn.Server(config)
+#     server.run()
